@@ -62,14 +62,14 @@ const main = async () => {
     let currentPageNumber = 0;
 
     while (true) {
-      await browser.navigateTo(
-        `https://www.crecisp.gov.br/cidadao/listadecorretores?page=${currentPageNumber}&firstLetter=${currentLetter}`
-      );
-
-      // const pageToReturn = await browser.getUrl();
+      const currentListPage = `https://www.crecisp.gov.br/cidadao/listadecorretores?page=${currentPageNumber}&firstLetter=${currentLetter}`;
+      await browser.navigateTo(currentListPage);
+      const pageToReturn = currentListPage;
 
       const cards = await browser.$$('.broker-details');
       if (cards.length === 0) break;
+
+      console.log('cards', cards.length);
 
       for (let i = 0; i < cards.length; i++) {
         console.log('init loop');
@@ -151,8 +151,10 @@ const main = async () => {
           console.log('caiu no catch');
         }
 
-        await browser.back();
-        // await browser.navigateTo(pageToReturn);
+        console.log('back');
+        // await browser.back();
+        await browser.navigateTo(pageToReturn);
+        console.log('end loop');
       }
 
       currentPageNumber++;
@@ -164,7 +166,13 @@ const main = async () => {
   console.log('Acabou');
 };
 
-main();
+main()
+  .then(() => {
+    console.log('Acabou');
+  })
+  .catch((err) => {
+    console.log('Deu pau', err);
+  });
 
 const saveJson = (object) => {
   fs.writeFile(

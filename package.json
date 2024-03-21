@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "jsonToCsv": "node jsonToCsv.js"
   },
   "dependencies": {
     "crawler": "^1.3.0",
