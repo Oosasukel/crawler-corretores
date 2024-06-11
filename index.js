@@ -3,6 +3,8 @@ var webdriverio = require('webdriverio');
 var wdOpts = { capabilities: { browserName: 'chrome' } };
 const fs = require('fs');
 
+const outputName = `${process.env.CORRETOR_CITY}.json`;
+
 const letters = [
   'A',
   'B',
@@ -87,65 +89,84 @@ const main = async () => {
           newCorretor.name = await name.getText();
 
           try {
-            const creci = await browser.$(function () {
-              return this.document.querySelector(
-                'label[for="RegisterNumber"]'
-              ).parentElement.nextElementSibling;
-            });
+            if (await browser.$('label[for="RegisterNumber"]').isExisting()) {
+              const creci = await browser.$(function () {
+                return this.document.querySelector(
+                  'label[for="RegisterNumber"]'
+                ).parentElement.nextElementSibling;
+              });
 
-            newCorretor.creci = await creci.getText();
+              newCorretor.creci = await creci.getText();
+            }
           } catch {}
 
           try {
-            const email = await browser.$(function () {
-              return this.document.querySelector(
-                'label[for="SecondaryMail"]'
-              ).parentElement.nextElementSibling;
-            });
+            if (await browser.$('label[for="SecondaryMail"]').isExisting()) {
+              const email = await browser.$(function () {
+                return this.document.querySelector(
+                  'label[for="SecondaryMail"]'
+                ).parentElement.nextElementSibling;
+              });
 
-            newCorretor.email = await email.getText();
+              newCorretor.email = await email.getText();
+            }
           } catch {}
 
           try {
-            const registerDate = await browser.$(function () {
-              return this.document.querySelector(
-                'label[for="RegisterDate"]'
-              ).parentElement.nextElementSibling;
-            });
+            if (await browser.$('label[for="RegisterDate"]').isExisting()) {
+              const registerDate = await browser.$(function () {
+                return this.document.querySelector(
+                  'label[for="RegisterDate"]'
+                ).parentElement.nextElementSibling;
+              });
 
-            newCorretor.registerDate = await registerDate.getText();
+              newCorretor.registerDate = await registerDate.getText();
+            }
           } catch {}
 
           try {
-            const registrationStatus = await browser.$(function () {
-              return this.document.querySelector(
-                'label[for="RegistrationStatus"]'
-              ).parentElement.nextElementSibling;
-            });
+            if (
+              await browser.$('label[for="RegistrationStatus"]').isExisting()
+            ) {
+              const registrationStatus = await browser.$(function () {
+                return this.document.querySelector(
+                  'label[for="RegistrationStatus"]'
+                ).parentElement.nextElementSibling;
+              });
 
-            newCorretor.registrationStatus = await registrationStatus.getText();
+              newCorretor.registrationStatus =
+                await registrationStatus.getText();
+            }
           } catch {}
 
           try {
             newCorretor.phones = [];
+            if (await browser.$('h3=Telefones').isExisting()) {
+              const phonesContainer = await (
+                await (await browser.$('h3=Telefones')).$('..')
+              ).$('..');
 
-            const phonesContainer = await (
-              await (await browser.$('h3=Telefones')).$('..')
-            ).$('..');
-
-            const phone1 = await phonesContainer.$(function () {
-              return this.nextElementSibling.querySelector('span');
-            });
-            newCorretor.phones.push(await phone1.getText());
-
-            try {
-              const phone2 = await phone1.$(function () {
+              const phone1 = await phonesContainer.$(function () {
                 return this.nextElementSibling.querySelector('span');
               });
-              newCorretor.phones.push(await phone2.getText());
-            } catch {}
+              newCorretor.phones.push(await phone1.getText());
+
+              try {
+                const hasPhone2 = await element.executeScript((elem) => {
+                  return elem.nextElementSibling !== null;
+                });
+
+                if (hasPhone2) {
+                  const phone2 = await phone1.$(function () {
+                    return this.nextElementSibling.querySelector('span');
+                  });
+                  newCorretor.phones.push(await phone2.getText());
+                }
+              } catch {}
+            }
           } catch {}
 
+          console.log('🎃', newCorretor);
           corretores.push(newCorretor);
         } catch {
           console.log('caiu no catch');
@@ -175,17 +196,12 @@ main()
   });
 
 const saveJson = (object) => {
-  fs.writeFile(
-    'corretores.json',
-    JSON.stringify(object),
-    'utf8',
-    function (err) {
-      if (err) {
-        console.log('An error occured while writing JSON Object to File.');
-        return console.log(err);
-      }
-
-      console.log('JSON file has been saved.');
+  fs.writeFile(outputName, JSON.stringify(object), 'utf8', function (err) {
+    if (err) {
+      console.log('An error occured while writing JSON Object to File.');
+      return console.log(err);
     }
-  );
+
+    console.log('JSON file has been saved.');
+  });
 };
